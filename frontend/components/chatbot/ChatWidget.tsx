@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { MessageCircle, X, Send } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import { useChat } from '@/lib/hooks/useChat';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface Message {
     id: string;
@@ -15,6 +16,7 @@ interface Message {
 }
 
 export default function ChatWidget() {
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -79,7 +81,7 @@ export default function ChatWidget() {
         setIsLoading(true);
 
         try {
-            const response = await sendMessage(input); // this calls frontend API which calls backend
+            const response = await sendMessage(input, user?.business?.id); // this calls frontend API which calls backend
 
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),

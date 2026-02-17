@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY,
+    defaultHeaders: {
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        "X-Title": "Product Marketplace",
+    }
 });
 
 export async function POST(request: Request) {
@@ -10,17 +15,12 @@ export async function POST(request: Request) {
         const { message, businessId } = await request.json();
 
         // Fetch products from your backend
-        // Note: process.env.NEXT_PUBLIC_API_URL works on server too usually, or use distinct server env var
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+        // Inside Docker, we use the service name 'backend'
+        const apiUrl = 'http://backend:8000/api';
 
-        // We should probably use a system token or just public endpoint if it is public
+        // Fetch products for context
         const productsResponse = await fetch(
-            `${apiUrl}/products/list_internal/?business=${businessId}`, // 'list_internal' might require auth. 
-            // The prompt suggests `products/public/?business=...` but `ProductViewSet` has `list_internal`.
-            // The prompt also says "Public only see approved products".
-            // Let's assume chatbot sees what public sees or we pass an auth header if available.
-            // But this route handler is server-side. It doesn't have the user's token easily unless passed in request headers.
-            // `request.headers.get('Authorization')` works.
+            `${apiUrl}/products/list_internal/?business=${businessId}`,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,19 +29,24 @@ export async function POST(request: Request) {
             }
         );
 
-        // If fetch failed
-        if (!productsResponse.ok) {
-            // Fallback to empty list or handle error
-            console.error("Products fetch failed", productsResponse.status);
-        }
+        const productsData = productsResponse.ok ? await productsResponse.json() : [];
+        const products = Array.isArray(productsData) ? productsData : (productsData.results || []);
 
-        const products = productsResponse.ok ? await productsResponse.json() : [];
+        console.log(`🤖 Chat Context: Found ${products.length} products for business ${businessId}`);
 
         // Create context for AI
-        const context = `You are a helpful product assistant. You have access to the following products:\n${JSON.stringify(products, null, 2)}\n\nPlease answer the user's question based on these products. If you cannot find relevant information, politely say so.`;
+        const context = `You are a helpful product assistant for a marketplace business. 
+        You have access to the following products from this business (in JSON format):
+        ${JSON.stringify(products, null, 2)}
+        
+        Please answer the user's question based on these products. 
+        If a product is found, describe it including its price.
+        If you cannot find relevant information, politely say you don't have that information.
+        Be concise and helpful.`;
 
+        console.log("🤖 Calling OpenRouter...");
         const completion = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
+            model: 'meta-llama/llama-3.3-70b-instruct:free',
             messages: [
                 { role: 'system', content: context },
                 { role: 'user', content: message },
@@ -51,8 +56,10 @@ export async function POST(request: Request) {
         });
 
         const aiResponse = completion.choices[0].message.content;
+        console.log("🤖 AI Response:", aiResponse);
 
         // Store in backend
+        console.log("🤖 Saving history...");
         await fetch(`${apiUrl}/chat/history/`, {
             method: 'POST',
             headers: {

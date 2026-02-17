@@ -33,7 +33,9 @@ services:
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8000/api
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+      OPENROUTER_API_KEY: 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
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
       # For client side access, user needs access to backend from browser
       # Since we are not setting up nginx/proxy, browser access to backend relies on localhost:8000
       # But inside container, frontend server needs to talk to backend container?
