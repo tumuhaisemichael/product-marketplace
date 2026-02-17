@@ -1,0 +1,16 @@
+Django>=4.2
+djangorestframework
+django-cors-headers
+django-filter
+djangorestframework-simplejwt
+psycopg2-binary
+django-extensions
+python-dotenv
+openai
+requests
+gunicorn
+pytest
+pytest-django
+Faker>=19.0.0
+dj-database-url
+psycopg2-binary
