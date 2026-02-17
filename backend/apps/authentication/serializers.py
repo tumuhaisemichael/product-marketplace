@@ -16,11 +16,32 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     business = BusinessSerializer(read_only=True)
-    role = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    role = serializers.SlugRelatedField(
+        slug_field='name', 
+        queryset=Role.objects.all(),
+        required=False
+    )
+    password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'business', 'role', 'is_business_admin']
+        fields = ['id', 'username', 'email', 'business', 'role', 'is_business_admin', 'password']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = super().create(validated_data)
+        if password:
+            user.set_password(password)
+            user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        user = super().update(instance, validated_data)
+        if password:
+            user.set_password(password)
+            user.save()
+        return user
 
 class RegisterSerializer(serializers.ModelSerializer):
     business_name = serializers.CharField(write_only=True)

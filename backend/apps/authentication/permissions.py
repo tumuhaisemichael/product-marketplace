@@ -22,3 +22,7 @@ class HasRolePermission(permissions.BasePermission):
             return True
             
         return request.user.role.name in required_permissions.get(action, [])
+
+class IsBusinessAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and (request.user.is_business_admin or request.user.role.name == 'admin')
