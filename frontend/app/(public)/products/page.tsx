@@ -97,6 +97,7 @@ export default function PublicProductsPage() {
                                 product={product}
                                 canEdit={false}
                                 canApprove={false}
+                                canDelete={false}
                             />
                         ))}
                     </div>
