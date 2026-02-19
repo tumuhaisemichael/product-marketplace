@@ -225,13 +225,31 @@ POSTGRES_PASSWORD=password
 4. Create a new key
 5. Copy the key to `OPENROUTER_API_KEY` in `.env`
 
-**For Supabase Database** (PostgreSQL):
+**For Supabase Database** (PostgreSQL - This is where all your data is stored):
 1. Visit https://supabase.com
 2. Sign up for a free account
 3. Create a new project
-4. Go to database settings
-5. Copy the connection string to `DATABASE_URL` in `.env`
-6. Format should be: `postgresql://postgres.xxxxx:password@aws-xxxxx.supabase.co:5432/postgres`
+4. Go to **Project Settings** → **Database** → **Connection Pooling**
+5. Select "Connection string" tab
+6. Copy the **URI** connection string (looks like: `postgresql://postgres.xxxxx:password@aws-xxxxx.supabase.co:5432/postgres`)
+7. Paste it into `DATABASE_URL` in your `.env` file
+8. Replace `[YOUR-PASSWORD]` with your actual database password from Supabase
+
+**Important**: Your Supabase URL is where:
+- All user data is stored (usernames, passwords, roles)
+- All product information is stored (names, descriptions, prices, approvals)
+- All chat history is stored
+- All business/team information is stored
+
+**Connection String Format**:
+```
+postgresql://postgres.[PROJECT-ID]:[PASSWORD]@aws-[REGION].supabase.co:5432/postgres
+```
+
+Example:
+```
+postgresql://postgres.abc123def456:mySecurePassword123@aws-eu-west-1.supabase.co:5432/postgres
+```
 
 ### Step 4: Verify Your `.env` File
 
