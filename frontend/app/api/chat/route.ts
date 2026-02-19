@@ -56,11 +56,11 @@ export async function POST(request: Request) {
         If you cannot find relevant information, politely say you don't have that information.
         Be concise and helpful.`;
 
-        console.log("🤖 Calling DeepSeek-R1 on OpenRouter...");
+        console.log("🤖 Calling Gemini 2.0 Flash on OpenRouter...");
 
         try {
             const completion = await openai.chat.completions.create({
-                model: 'deepseek/deepseek-r1:free',
+                model: 'google/gemini-2.0-flash-exp:free',
                 messages: [
                     { role: 'system', content: context },
                     { role: 'user', content: message },
