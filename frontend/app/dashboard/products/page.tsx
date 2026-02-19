@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function ProductsPage() {
     const { user, hasPermission } = useAuth();
-    const { products, loading, error, pagination, fetchProducts, approveProduct } = useProducts();
+    const { products, loading, error, pagination, fetchProducts, approveProduct, deleteProduct } = useProducts();
     const [filters, setFilters] = useState({
         status: '',
         search: '',
@@ -21,6 +21,17 @@ export default function ProductsPage() {
     useEffect(() => {
         fetchProducts({ ...filters, internal: true });
     }, [filters]);
+
+    const handleDelete = async (id: number) => {
+        if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+            try {
+                await deleteProduct(id);
+                fetchProducts({ ...filters, internal: true });
+            } catch (err: any) {
+                alert(err.response?.data?.error || err.response?.data?.detail || "Failed to delete product");
+            }
+        }
+    };
 
     // Stats calculation (simplified)
     const stats = [
@@ -89,22 +100,29 @@ export default function ProductsPage() {
                 </div>
             ) : products.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {products.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            canEdit={hasPermission('edit')}
-                            canApprove={hasPermission('approve')}
-                            onApprove={async (id) => {
-                                try {
-                                    await approveProduct(id);
-                                    fetchProducts({ ...filters, internal: true });
-                                } catch (err: any) {
-                                    alert(err.response?.data?.error || err.response?.data?.detail || "Failed to approve product");
-                                }
-                            }}
-                        />
-                    ))}
+                    {products.map((product) => {
+                        const isOwner = user?.id === product.created_by;
+                        const isAdmin = user?.role === 'admin';
+
+                        return (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                canEdit={hasPermission('edit') && (isOwner || isAdmin)}
+                                canApprove={hasPermission('approve') && !isOwner}
+                                canDelete={hasPermission('delete') && (isOwner || isAdmin)}
+                                onDelete={handleDelete}
+                                onApprove={async (id) => {
+                                    try {
+                                        await approveProduct(id);
+                                        fetchProducts({ ...filters, internal: true });
+                                    } catch (err: any) {
+                                        alert(err.response?.data?.error || err.response?.data?.detail || "Failed to approve product");
+                                    }
+                                }}
+                            />
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">

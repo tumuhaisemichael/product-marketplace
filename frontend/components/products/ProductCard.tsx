@@ -5,13 +5,14 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 import { Product } from "@/lib/hooks/useProducts";
-import { Check, Edit, ShoppingCart, ExternalLink, Building2 } from "lucide-react";
+import { Check, Edit, ShoppingCart, ExternalLink, Building2, User, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface ProductCardProps {
     product: Product;
     canEdit: boolean;
     canApprove: boolean;
+    canDelete: boolean;
     onApprove?: (id: number) => void;
     onDelete?: (id: number) => void;
 }
@@ -20,6 +21,7 @@ export default function ProductCard({
     product,
     canEdit,
     canApprove,
+    canDelete,
     onApprove,
     onDelete,
 }: ProductCardProps) {
@@ -50,9 +52,15 @@ export default function ProductCard({
             </div>
 
             <CardContent className="p-6">
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-3 group-hover:text-indigo-500 transition-colors">
-                    <Building2 className="w-3 h-3" />
-                    <span className="truncate">{product.business_name}</span>
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 group-hover:text-indigo-500 transition-colors">
+                        <Building2 className="w-3 h-3" />
+                        <span className="truncate">{product.business_name}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
+                        <User className="w-2.5 h-2.5" />
+                        <span>{product.created_by_name}</span>
+                    </div>
                 </div>
 
                 <h3 className="text-xl font-bold text-slate-900 mb-2 truncate group-hover:text-indigo-600 transition-colors">
@@ -80,13 +88,13 @@ export default function ProductCard({
                 </div>
             </CardContent>
 
-            {(canEdit || canApprove) && (
-                <CardFooter className="px-6 pb-6 pt-0 flex gap-3">
+            {(canEdit || canApprove || canDelete) && (
+                <CardFooter className="px-6 pb-6 pt-0 flex gap-2">
                     {canEdit && (
                         <Link href={`/dashboard/products/${product.id}`} className="flex-1">
-                            <Button variant="outline" className="w-full rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all">
+                            <Button variant="outline" className="w-full h-11 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all">
                                 <Edit className="w-4 h-4 mr-2" />
-                                Edit item
+                                Edit
                             </Button>
                         </Link>
                     )}
@@ -94,10 +102,21 @@ export default function ProductCard({
                     {canApprove && product.status !== 'approved' && onApprove && (
                         <Button
                             onClick={() => onApprove(product.id)}
-                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 transition-all active:scale-95"
+                            className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-100 transition-all active:scale-95"
                         >
                             <Check className="w-4 h-4 mr-2" />
                             Approve
+                        </Button>
+                    )}
+
+                    {canDelete && onDelete && (
+                        <Button
+                            onClick={() => onDelete(product.id)}
+                            variant="ghost"
+                            className="w-11 h-11 p-0 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                            title="Delete product"
+                        >
+                            <Trash2 className="w-5 h-5" />
                         </Button>
                     )}
                 </CardFooter>
