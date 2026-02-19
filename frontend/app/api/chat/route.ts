@@ -15,6 +15,15 @@ const openai = new OpenAI({
     }
 });
 
+// Helper to get backend URL - in Docker use http://backend:8000, otherwise localhost:8000
+function getBackendUrl() {
+    // When running in Docker container, use the service name
+    if (process.env.NODE_ENV === 'production' || process.env.DOCKER === 'true') {
+        return 'http://backend:8000/api';
+    }
+    return 'http://localhost:8000/api';
+}
+
 export async function POST(request: Request) {
     try {
         const { message, businessId } = await request.json();
@@ -24,7 +33,7 @@ export async function POST(request: Request) {
         console.log('🤖 Using API key:', process.env.OPENROUTER_API_KEY ? '✓ Present' : '✗ Missing');
 
         // Fetch products from your backend
-        const apiUrl = 'http://backend:8000/api';
+        const apiUrl = getBackendUrl();
 
         // Fetch products for context
         const productsResponse = await fetch(
@@ -75,7 +84,7 @@ export async function POST(request: Request) {
 
             // Store in backend
             try {
-                await fetch(`${apiUrl}/chat/history/`, {
+                const historyResponse = await fetch(`${apiUrl}/chat/history/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -86,7 +95,12 @@ export async function POST(request: Request) {
                         ai_response: aiResponse,
                     }),
                 });
-                console.log("✅ History saved");
+                
+                if (!historyResponse.ok) {
+                    console.error('❌ Failed to save history:', historyResponse.status);
+                } else {
+                    console.log("✅ History saved");
+                }
             } catch (historyError) {
                 console.error('❌ Failed to save history:', historyError);
             }
@@ -100,8 +114,9 @@ export async function POST(request: Request) {
                 response: openAIError.response?.data
             });
 
+            const errorMessage = openAIError.message || 'OpenRouter API error';
             return NextResponse.json(
-                { error: `OpenRouter API error: ${openAIError.message}` },
+                { error: `Failed to get AI response: ${errorMessage}` },
                 { status: openAIError.status || 500 }
             );
         }

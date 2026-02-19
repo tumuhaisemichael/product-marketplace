@@ -81,7 +81,7 @@ export default function ChatWidget() {
         setIsLoading(true);
 
         try {
-            const response = await sendMessage(input, user?.business?.id); // this calls frontend API which calls backend
+            const response = await sendMessage(input, user?.business?.id);
 
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),
@@ -91,13 +91,14 @@ export default function ChatWidget() {
             };
 
             setMessages((prev) => [...prev, aiMessage]);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Chat error:', error);
+            const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
             setMessages((prev) => [
                 ...prev,
                 {
                     id: (Date.now() + 1).toString(),
-                    text: 'Sorry, I encountered an error. Please try again.',
+                    text: errorMessage,
                     isUser: false,
                     timestamp: new Date(),
                 },

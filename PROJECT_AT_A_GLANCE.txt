@@ -1,0 +1,261 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                 BUSINESS PRODUCT MARKETPLACE - AT A GLANCE                     ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌─ PROJECT TYPE ─────────────────────────────────────────────────────────────────┐
+│ Full-Stack Multi-Tenant SaaS Marketplace Platform                             │
+│ Purpose: Manage products with approval workflows + AI chatbot                 │
+│ Status: ✅ Running, Tested, and Production-Ready                             │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ TECH STACK ───────────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ FRONTEND (React/Next.js)           │ BACKEND (Django/Python)                  │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+│ • Next.js 14.1.4                   │ • Django 4.2+                           │
+│ • React 18                         │ • Django REST Framework                 │
+│ • TypeScript 5                     │ • SimpleJWT (authentication)            │
+│ • Tailwind CSS 3.3                 │ • PostgreSQL 15 (Supabase)              │
+│ • React Query 5.28                 │ • Python 3.11                           │
+│ • Axios 1.6.8                      │                                         │
+│ • Zod + React Hook Form            │                                         │
+│ • Shadcn/Radix UI                  │                                         │
+│                                     │                                         │
+│ PORT: 3000                         │ PORT: 8000                              │
+│ http://localhost:3000              │ http://localhost:8000/api               │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CORE FEATURES ────────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ ✅ Authentication & Authorization                                             │
+│    • JWT token-based authentication (access + refresh tokens)                │
+│    • Role-based access control (Admin, Editor, Approver, Viewer)             │
+│    • Auto token refresh mechanism                                            │
+│    • Secure token storage in localStorage                                    │
+│                                                                                 │
+│ ✅ Multi-Tenancy                                                              │
+│    • Each business is completely isolated                                    │
+│    • Automatic data filtering by business                                    │
+│    • Users only see their business's data                                    │
+│                                                                                 │
+│ ✅ Product Management                                                         │
+│    • Product lifecycle: Draft → Pending → Approved → Public                  │
+│    • Approval workflow with role-based permissions                           │
+│    • Search, filter, and sort products                                       │
+│    • Public marketplace view (approved products only)                        │
+│                                                                                 │
+│ ✅ AI Chatbot                                                                 │
+│    • Powered by Mistral 7B (via OpenRouter)                                  │
+│    • Context-aware (knows business products)                                 │
+│    • Chat history persistence                                                │
+│    • Real-time responses                                                     │
+│                                                                                 │
+│ ✅ Team Management                                                            │
+│    • Business admins manage team members                                      │
+│    • Assign roles (admin, editor, approver, viewer)                          │
+│    • Per-business user isolation                                             │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ DATABASE MODELS ──────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ Business                           Product                                     │
+│ ├─ id                             ├─ id                                      │
+│ ├─ name (unique)                  ├─ name                                    │
+│ ├─ created_at                     ├─ description                             │
+│ └─ updated_at                     ├─ price                                   │
+│                                   ├─ status (draft|pending|approved|rejected)│
+│ User                              ├─ business (FK)                           │
+│ ├─ id                             ├─ created_by (FK)                        │
+│ ├─ username                       ├─ approved_by (FK)                       │
+│ ├─ email                          ├─ created_at                             │
+│ ├─ password (hashed)              ├─ updated_at                             │
+│ ├─ business (FK)                  └─ approved_at                            │
+│ ├─ role (FK)                                                                 │
+│ └─ is_business_admin              ChatHistory                                │
+│                                   ├─ id                                      │
+│ Role                              ├─ user (FK)                              │
+│ ├─ id                             ├─ business (FK)                          │
+│ ├─ name                           ├─ user_message                           │
+│ └─ permissions (JSON)             ├─ ai_response                            │
+│                                   └─ timestamp                              │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ API ENDPOINTS ────────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ AUTHENTICATION                  PRODUCTS                CHAT                    │
+│ POST   /auth/register/          GET    /products/      GET  /chat/history/   │
+│ POST   /auth/login/             GET    /products/{id}/ POST /chat/history/   │
+│ POST   /auth/refresh/           POST   /products/                            │
+│ GET    /auth/me/                PATCH  /products/{id}/                       │
+│ GET    /auth/users/             DELETE /products/{id}/                       │
+│ POST   /auth/users/             POST   /products/{id}/approve/              │
+│ GET    /auth/roles/             GET    /products/list_internal/             │
+│                                                                                 │
+│ AI CHAT (Next.js Route)                                                      │
+│ POST   /api/chat                (Frontend API, calls OpenRouter)            │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ FOLDER STRUCTURE ─────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ product-marketplace/                                                          │
+│ ├── frontend/                  ← React/Next.js app (port 3000)              │
+│ │   ├── app/                   ← Pages and layouts                          │
+│ │   ├── components/            ← Reusable UI components                    │
+│ │   ├── lib/                   ← Hooks, API client, utilities              │
+│ │   └── public/                ← Static assets                             │
+│ │                                                                             │
+│ ├── backend/                   ← Django REST API (port 8000)               │
+│ │   ├── config/                ← Django settings                           │
+│ │   ├── apps/                  ← Django applications                       │
+│ │   │   ├── authentication/    ← User & auth                              │
+│ │   │   ├── products/          ← Product management                       │
+│ │   │   └── chat/              ← Chat history                             │
+│ │   └── tests/                 ← Test suite                               │
+│ │                                                                             │
+│ ├── .env                       ← Environment vars (NEVER commit)           │
+│ ├── .env.example               ← Template (safe to commit)                 │
+│ ├── docker-compose.yml         ← Container orchestration                  │
+│ └── [documentation files]      ← Your guides!                              │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ USER ROLES & PERMISSIONS ─────────────────────────────────────────────────────┐
+│                                                                                 │
+│             │ Create │ Edit │ Delete │ Approve │ Manage Users │             │
+│ ─────────────┼────────┼──────┼────────┼─────────┼──────────────┤             │
+│ Admin       │   ✅   │  ✅  │   ✅   │   ✅    │      ✅       │             │
+│ Editor      │   ✅   │  ✅  │   ❌   │   ❌    │      ❌       │             │
+│ Approver    │   ❌   │  ❌  │   ❌   │   ✅    │      ❌       │             │
+│ Viewer      │   ❌   │  ❌  │   ❌   │   ❌    │      ❌       │             │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ AUTHENTICATION FLOW ──────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ 1. User registers/logs in                                                     │
+│    └─> Backend issues JWT tokens (access + refresh)                         │
+│                                                                                 │
+│ 2. Frontend stores tokens in localStorage                                     │
+│    └─> Attached to all API requests                                         │
+│                                                                                 │
+│ 3. Access token expires (1 hour)                                              │
+│    └─> Frontend auto-refreshes using refresh token                          │
+│                                                                                 │
+│ 4. Refresh token expires (24 hours)                                           │
+│    └─> User must log in again                                               │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ PRODUCT LIFECYCLE ────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ DRAFT              PENDING APPROVAL        APPROVED          REJECTED         │
+│ (Private)          (Private)               (Public)          (Private)        │
+│     │                   │                      │                  │          │
+│     ├─ Only user    ├─ Awaiting          ├─ Visible to   ├─ Visible      │
+│     │   and staff      approval from        all users on      to owner     │
+│     │   can see       approver             /products/        and staff     │
+│     │                                                                       │
+│     └─ Editor      └─ Ready for     └─ Can be public  └─ Can be re-     │
+│        submits        review by          marketplace       submitted      │
+│        for            approver           listing           for approval   │
+│        approval                                                            │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ AI CHATBOT FLOW ──────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ User types message in ChatWidget                                               │
+│     ↓                                                                           │
+│ Sent to /api/chat (Next.js route)                                            │
+│     ↓                                                                           │
+│ Backend fetches user's products                                               │
+│     ↓                                                                           │
+│ Calls OpenRouter API (Mistral 7B model)                                       │
+│     ↓                                                                           │
+│ AI generates contextual response                                              │
+│     ↓                                                                           │
+│ Saves to ChatHistory in database                                              │
+│     ↓                                                                           │
+│ Returns response to frontend                                                   │
+│     ↓                                                                           │
+│ Displayed in ChatWidget                                                       │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ DOCKER SERVICES ──────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ Service     Image              Port    Purpose                                │
+│ ─────────────────────────────────────────────────────────────────────────────│
+│ db          postgres:15        5432    Database (Supabase)                   │
+│ backend     custom             8000    Django REST API                       │
+│ frontend    custom             3000    Next.js Application                   │
+│                                                                                 │
+│ Start all: docker-compose up                                                 │
+│ Stop all:  docker-compose down                                               │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ SECURITY FEATURES ────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ ✅ JWT Authentication        - Stateless, secure token-based auth          │
+│ ✅ CORS Protection           - Only frontend origin allowed                 │
+│ ✅ Password Hashing          - PBKDF2 with Django                          │
+│ ✅ Environment Variables     - Secrets in .env (git-ignored)               │
+│ ✅ Multi-Tenancy            - Business-level data isolation                │
+│ ✅ Email Constraints         - Unique per business in DB                   │
+│ ✅ Permission Checking       - Role-based on every endpoint                │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ QUICK COMMANDS ───────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ docker-compose up                     # Start all services                   │
+│ docker-compose logs -f backend        # View backend logs                    │
+│ docker-compose exec backend python manage.py createsuperuser                 │
+│                                       # Create admin user                    │
+│ npm test                              # Run frontend tests                   │
+│ docker-compose exec backend pytest    # Run backend tests                    │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ DOCUMENTATION GUIDE ──────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ File                        Purpose                                           │
+│ ─────────────────────────────────────────────────────────────────────────────│
+│ README.md                   High-level overview                             │
+│ QUICK_REFERENCE.md          Quick commands & API endpoints                  │
+│ TECH_STACK_OVERVIEW.md      Complete technology breakdown                  │
+│ ARCHITECTURE.md             Data flows & system architecture                │
+│ PROJECT_MAP.md              File structure & dependencies                   │
+│ AI_CHATBOT_FIXES.md         Recent improvements & fixes                     │
+│ DOCUMENTATION_INDEX.md      Guide to all documentation                      │
+│ PROJECT_AT_A_GLANCE.txt     This file!                                      │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CURRENT STATUS ───────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│ ✅ Backend running                                                            │
+│ ✅ Frontend running                                                           │
+│ ✅ Database connected                                                         │
+│ ✅ Products loading                                                           │
+│ ✅ Chat functional                                                            │
+│ ✅ Authentication working                                                     │
+│ ✅ All migrations applied                                                     │
+│ ✅ Environment variables secured                                              │
+│ ✅ API keys protected                                                         │
+│ ✅ Error handling improved                                                    │
+│ ✅ Comprehensive documentation created                                        │
+│                                                                                 │
+│ Status: READY FOR DEVELOPMENT ✅                                             │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════════
+                        Created: February 19, 2026
+                    Start with QUICK_REFERENCE.md for help
+═══════════════════════════════════════════════════════════════════════════════════
