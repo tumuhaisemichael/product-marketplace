@@ -8,7 +8,7 @@ if (!process.env.OPENROUTER_API_KEY) {
 
 const openai = new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
-    apiKey: process.env.OPENROUTER_API_KEY,
+    apiKey: process.env.OPENROUTER_API_KEY?.trim(),
     defaultHeaders: {
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
         "X-Title": "Product Marketplace",
@@ -56,11 +56,11 @@ export async function POST(request: Request) {
         If you cannot find relevant information, politely say you don't have that information.
         Be concise and helpful.`;
 
-        console.log("🤖 Calling Gemini 2.0 Flash on OpenRouter...");
+        console.log("🤖 Calling Mistral 7B on OpenRouter...");
 
         try {
             const completion = await openai.chat.completions.create({
-                model: 'google/gemini-2.0-flash-exp:free',
+                model: 'mistralai/mistral-7b-instruct:free',
                 messages: [
                     { role: 'system', content: context },
                     { role: 'user', content: message },
